@@ -1,47 +1,29 @@
-import { useState } from "react";
-import ExpenseList from "./components/expense-tracker/components/ExpenseList";
-import ExpenseFilter from "./components/expense-tracker/components/ExpenseFilter";
-import ExpenseForm from "./components/expense-tracker/components/ExpenseForm";
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+interface User {
+  id: number;
+  name: string;
+}
 
 const App = () => {
-  const [expenses, setExpenses] = useState([
-    { id: 1, description: "AAA", amount: 200, category: "Utilities" },
-    { id: 2, description: "BBB", amount: 200, category: "Utilities" },
-    { id: 3, description: "CCC", amount: 200, category: "Utilities" },
-    { id: 4, description: "DDD", amount: 200, category: "Utilities" },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
-  const [selectedCategory, setSelectedCategory] = useState("");
-
-  const onDelete = (id: number) => {
-    const remainingExpenses = expenses.filter((item) => item.id !== id);
-    setExpenses(remainingExpenses);
-  };
-
-  const filterCategory = (selectedCategory: string) => {
-    setSelectedCategory(selectedCategory);
-  };
-
+  useEffect(() => {
+    axios
+      .get<User[]>(`https://jsonplaceholder.typicode.com/users`)
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch((error) => console.log(error.response));
+  }, []);
   return (
     <div>
-      <div className="mb-5">
-        <ExpenseForm
-          onSubmit={(expense) => {
-            setExpenses([...expenses, { ...expense, id: expenses.length + 1 }]);
-          }}
-        />
-      </div>
-
-      <h3>Filter</h3>
-      <ExpenseFilter onSelectCategory={filterCategory} />
-      <ExpenseList
-        expenses={
-          selectedCategory
-            ? expenses.filter((item) => item.category === selectedCategory)
-            : expenses
-        }
-        onDelete={onDelete}
-      />
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
     </div>
   );
 };
